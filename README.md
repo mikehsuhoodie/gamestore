@@ -37,8 +37,8 @@ python3 server/lobby_server.py &
 *   **介面**: `tkinter` GUI。
 *   **特色**: 支援即時輸入同步、遊戲結束自動回報 Lobby。
 
-## 內建遊戲：Tic-Tac-Toe (TT)
-本平台包含一個 CLI 示範遊戲 `TT` (Tic-Tac-Toe)，為標準且符合本平台協定的 CLI 遊戲範本。
+## 內建遊戲：TT (Pick Number)
+本平台包含一個 CLI 示範遊戲 `TT` (Pick Number Game)，這是一個簡單的數字攻擊遊戲 (選擇 1-10 進行攻擊)。
 *   **架構**: Server-Authoritative。
 *   **介面**: Command Line Interface (CLI)。
 *   **特色**: 展示最小可行性產品 (MVP) 的實作方式，包含標準輸入輸出互動與 Process Lifecycle 整合。
