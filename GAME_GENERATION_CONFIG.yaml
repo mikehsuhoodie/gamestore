@@ -1,0 +1,108 @@
+# GAME GENERATION CONFIGURATION
+# Input this entire file to an AI to generate a compatible game.
+
+platform:
+  os: "linux"
+  language: "python3"
+  ui_framework: "tkinter (for client) or CLI"
+  
+constraints:
+  server_port_allocation: "Dynamic (passed via --port arg)"
+  lobby_server_port: 10192
+  lobby_server_host: "127.0.0.1"
+
+file_structure:
+  required_files:
+    - metadata.json
+    - game_server.py
+    - game_client.py
+  
+  metadata_schema: |
+    {
+      "description": "Short description of the game",
+      "structure": {
+        "server_script": "game_server.py",
+        "client_script": "game_client.py"
+      },
+      "metadata": {
+        "name": "Game Name",
+        "version": "1.0.0",
+        "type": "GUI",  # or CLI
+        "min_players": 2,
+        "max_players": 2
+      },
+      "launch_arguments": {
+        "server": ["python3", "game_server.py", "--port", "<port>", "--room_id", "<room_id>"],
+        "client": ["python3", "game_client.py", "--ip", "<ip>", "--port", "<port>"]
+      }
+    }
+
+server_implementation_guidelines:
+  cli_arguments:
+    - name: "--port"
+      type: int
+      required: true
+      description: "Port to listen on for game connections"
+    - name: "--room_id"
+      type: str
+      required: true
+      description: "Room ID used for reporting game results back to the lobby"
+    - name: "--lobby_port"
+      type: int
+      required: false
+      description: "Port of the Lobby Server to report results to (default: 10192)"
+
+  lifecycle:
+    start: "Bind to 0.0.0.0:<port> and wait for players."
+    game_loop: "Handle game logic, broadcasting state to clients."
+    termination: "When game ends, REPORT RESULT to lobby, then close."
+
+  game_over_reporting_protocol:
+    description: "Crucial Step. The server MUST report the result to the Lobby Server before exiting."
+    transport: "TCP Socket"
+    destination: "127.0.0.1:<lobby_port> (passed via --lobby_port)"
+    payload_format: "JSON"
+    payload_schema: |
+      {
+        "action": "game_result",
+        "room_id": "<room_id from args>",
+        "winner": "<winning_player_username_or_index>", # e.g., "P1" or "P2"
+        "reason": "<win condition description>" # e.g., "HP reached 0"
+      }
+    example_code: |
+      def check_game_over(self):
+          if self.winner:
+              # 1. Connect to Lobby
+              sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+              sock.connect(('127.0.0.1', 10192))
+              
+              # 2. Send Result
+              res = {
+                  "action": "game_result", 
+                  "room_id": self.room_id,
+                  "winner": f"P{self.winner_index + 1}",
+                  "reason": "Normal Win"
+              }
+              sock.sendall(json.dumps(res).encode())
+              sock.close()
+              
+              # 3. Shutdown
+              self.server_socket.close()
+              sys.exit(0)
+
+client_implementation_guidelines:
+  cli_arguments:
+    - name: "--ip"
+      type: str
+      required: true
+      description: "Game Server IP"
+    - name: "--port"
+      type: int
+      required: true
+      description: "Game Server Port"
+      
+  behavior:
+    - "Connect to the Game Server using the provided IP and Port."
+    - "Render UI/CLI."
+    - "Send player actions to server."
+    - "Listen for game state updates from server."

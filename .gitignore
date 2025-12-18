@@ -1,0 +1,19 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.env
+.venv
+env.bak/
+venv.bak/
+.gemini/
+.DS_Store
+
+# User downloads
+downloads/
+
+# Server runtime state
+server_data/rooms.json

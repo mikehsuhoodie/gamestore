@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Store | Nexus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="background-globes">
+        <div class="globe g1"></div>
+        <div class="globe g2"></div>
+        <div class="globe g3"></div>
+    </div>
+
+    <div id="app">
+        <!-- Notification Toast -->
+        <div id="toast" class="toast hidden">Action Successful</div>
+
+        <!-- Auth View -->
+        <div id="view-auth" class="view active">
+            <div class="glass-panel auth-panel">
+                <h1 class="logo">NEXUS <span class="accent">STORE</span></h1>
+                <p class="subtitle">Enter the Grid</p>
+
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="switchAuthMode('login')">Login</button>
+                    <button class="tab-btn" onclick="switchAuthMode('register')">Register</button>
+                </div>
+
+                <form id="auth-form">
+                    <div class="input-group">
+                        <input type="text" id="username" placeholder="Username" required autocomplete="off">
+                    </div>
+                    <div class="input-group">
+                        <input type="password" id="password" placeholder="Password" required>
+                    </div>
+                    <button type="submit" class="btn primary full-width" id="auth-submit">Login</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Main Dashboard View -->
+        <div id="view-dashboard" class="view hidden">
+            <nav class="glass-nav">
+                <div class="nav-brand">NEXUS</div>
+                <div class="nav-links">
+                    <button class="nav-btn active" onclick="showTab('store')">Store</button>
+                    <button class="nav-btn" onclick="showTab('library')">Library</button>
+                </div>
+                <div class="nav-user">
+                    <span id="user-display">Guest</span>
+                    <button class="btn sm danger" onclick="logout()">Logout</button>
+                </div>
+            </nav>
+
+            <main class="content-area">
+                <!-- Store Tab -->
+                <div id="tab-store" class="tab-content active">
+                    <div class="header-row">
+                        <h2>Available Games</h2>
+                        <button class="btn icon-btn" onclick="refreshStore()">↻</button>
+                    </div>
+                    <div class="grid-layout" id="store-grid">
+                        <!-- Game Cards Injected Here -->
+                        <div class="loading-spinner"></div>
+                    </div>
+                </div>
+
+                <!-- Library Tab -->
+                <div id="tab-library" class="tab-content hidden">
+                    <div class="header-row">
+                        <h2>My Library</h2>
+                        <button class="btn icon-btn" onclick="refreshLibrary()">↻</button>
+                    </div>
+                    <div class="grid-layout" id="library-grid">
+                        <!-- Library Cards Injected Here -->
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- Room Modal -->
+        <div id="modal-room" class="modal hidden">
+            <div class="glass-panel modal-content">
+                <button class="close-btn" onclick="closeModal('modal-room')">×</button>
+                <h2 id="room-game-title">Game Room</h2>
+
+                <div class="room-actions">
+                    <div class="panel-section">
+                        <h3>Create Room</h3>
+                        <div class="row">
+                            <input type="text" id="new-room-name" placeholder="Room Name">
+                            <button class="btn primary" onclick="createRoom()">Create</button>
+                        </div>
+                    </div>
+
+                    <div class="panel-section">
+                        <h3>Join Room</h3>
+                        <div class="row">
+                            <input type="text" id="join-room-id" placeholder="Room ID">
+                            <button class="btn secondary" onclick="joinRoom()">Join</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h3>Available Rooms</h3>
+                    <button class="btn sm text-btn" onclick="refreshRooms()">Refresh List</button>
+                    <div class="room-list" id="room-list">
+                        <!-- Room Items -->
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Active Room View -->
+        <div id="active-room-view" class="overlay hidden">
+            <div class="room-panel">
+                <h3 class="room-title" id="ar-room-name">...</h3>
+                <div class="room-id-display">ID: <span id="ar-room-id">...</span></div>
+
+                <div class="player-list-container">
+                    <h4 style="margin-bottom: 1rem; color: var(--text-muted); text-align: left;">
+                        PLAYERS (<span id="ar-player-count">0</span>)
+                    </h4>
+                    <div id="ar-player-list">
+                        <!-- injected players -->
+                    </div>
+                </div>
+
+                <div class="room-controls">
+                    <!-- Host Only -->
+                    <button id="btn-start-game" class="btn primary full-width hidden" onclick="startGame()">Start
+                        Game</button>
+
+                    <p id="ar-status-msg" class="info-text">
+                        <span class="status-pulse"></span> Waiting for host...
+                    </p>
+
+                    <button class="btn danger full-width" onclick="leaveRoom()">Leave Room</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Review Modal -->
+        <div id="modal-review" class="modal hidden">
+            <div class="glass-panel modal-content" style="max-width: 400px;">
+                <h2>Game Over</h2>
+                <p id="review-game-msg" style="margin-bottom: 1rem;">The game has ended.</p>
+
+                <div class="input-group">
+                    <label>Score (1-5)</label>
+                    <div class="rating-stars" id="rating-stars">
+                        <span onclick="setRating(1)">★</span>
+                        <span onclick="setRating(2)">★</span>
+                        <span onclick="setRating(3)">★</span>
+                        <span onclick="setRating(4)">★</span>
+                        <span onclick="setRating(5)">★</span>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Comment</label>
+                    <textarea id="review-comment" rows="3" placeholder="How was it?"></textarea>
+                </div>
+
+                <div class="row">
+                    <button class="btn secondary" onclick="closeReviewModal()">Skip</button>
+                    <button class="btn primary" onclick="submitReview()">Submit</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Details Modal -->
+        <div id="modal-game-details" class="modal hidden">
+            <div class="glass-panel modal-content" style="max-width: 600px;">
+                <button class="close-btn" onclick="closeModal('modal-game-details')">×</button>
+                <h2 id="gd-game-title">Game Title</h2>
+                <div class="game-meta-row">
+                    <span id="gd-game-ver" class="tag">v1.0</span>
+                    <div class="rating-display" id="gd-rating-display">
+                        <span class="star">★</span> <span id="gd-rating-val">4.5</span>
+                    </div>
+                </div>
+
+                <p id="gd-game-desc" class="card-desc" style="margin: 1rem 0; color: #eee; -webkit-line-clamp: unset;">
+                    Description...</p>
+
+                <div class="panel-section">
+                    <h3>Reviews</h3>
+                    <div id="gd-reviews-list" class="reviews-list">
+                        <!-- Reviews injected here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,13 @@
+{
+  "mikeDev_TT": {
+    "name": "TT",
+    "author": "mikeDev",
+    "version": "2.0.0",
+    "description": "Standard Game Configuration Specification",
+    "path": "/home/mike/2025_Autumn/NetworkProgramming/hw3/server_data/game_files/mikeDev_TT",
+    "entry_point": "game_server.py",
+    "type": "CLI",
+    "max_players": 2,
+    "min_players": 2
+  }
+}
